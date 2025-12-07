@@ -10,17 +10,35 @@ import org.team1540.robot.generated.TunerConstants;
 import java.util.Queue;
 
 public class GyroIOPigeon2 implements GyroIO{
+    // Gyro
     private final Pigeon2 gyro = new Pigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, TunerConstants.kCANBus);
+
+    // Inputs From Gyro
     private final StatusSignal<Angle> gyroYaw;
+    private final StatusSignal<AnglularVelocity> gyroAngularVelocity;
 
+    // Timestamp
     private final Queue<Double> timeStampQueue;
-    private final Queue<Double> yawQueue;
-    public GyroIOPigeon2 () {
 
+    // Queue
+    private final Queue<Double> yawQueue;
+
+    public GyroIOPigeon2 () {
+        // Loading Configurations
         gyro.getConfigurator().apply(TunerConstants.DrivetrainConstants.Pigeon2Configs);
 
-        gyroYaw = gyro.getYaw();
+        // Zeroing
+        gyro.getConfigurator().setView(0.0);
 
+        // Setting Update Frequency
+        gyroYaw.setUpdateFrequency(DrivetrainConstants.FAST_UPDATE_FREQUENCY_HZ);
+        gyroAngularVelocity.setUpdateFrequency(DrivetrainConstants.NORMAL_UPDATE_FREQUENCY_HZ);
+
+        // Recieving Initial Inputs
+        gyroYaw = gyro.getYaw();
+        gyroAngularVelocity = gyro.getAngularVelocityZWorld();
+
+        // Odometry Queue
         yawQueue = OdometryThread.getInstance().registerSignal(gyroYaw);
         timeStampQueue = OdometryThread.getInstance().makeTimestampQueue();
     }

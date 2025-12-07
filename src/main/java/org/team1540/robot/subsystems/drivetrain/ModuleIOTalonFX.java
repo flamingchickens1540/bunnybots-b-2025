@@ -60,8 +60,13 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final VoltageOut turnVoltageRequest = new VoltageOut(0);
 
 
-     public ModuleIOTalonFX (            
-        SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
+     public ModuleIOTalonFX (
+        // Arguments
+        SwerveModuleConstants<TalonFXConfiguration,
+        TalonFXConfiguration,
+        CANcoderConfiguration> constants) {
+
+        // Implementing Constants
         this.constants = constants;
         ModuleHWConfigs hw = ModuleHWConfigs.fromModuleConstants(constants);
         drive = new TalonFX(constants.DriveMotorId, DrivetrainConstants.CAN_BUS);
@@ -71,9 +76,10 @@ public class ModuleIOTalonFX implements ModuleIO {
         drive.getConfigurator().apply(hw.driveConfig());
         turn.getConfigurator().apply(hw.turnConfig());
         cancoder.getConfigurator().apply(hw.turnEncoderConfig());
-        
+
+        // Recieving Initial Inputs
         drivePosition = drive.getPosition();
-        //drivePositionQueue = drive.getPosition
+        //dzrivePositionQueue = drive.getPosition
         driveVelocity = drive.getVelocity();
         driveAppliedVolts = drive.getMotorVoltage();
         driveSupplyCurrent = drive.getSupplyCurrent();
@@ -89,7 +95,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnStatorCurrent = turn.getStatorCurrent();
         turnTemp = turn.getDeviceTemp();
 
-         // Odometry Queues
+        // Odometry Queues
         turnPositionQueue = OdometryThread.getInstance().registerSignal(turnPosition);
         drivePositionQueue = OdometryThread.getInstance().registerSignal(drivePosition);
         timeStampQueue = OdometryThread.getInstance().makeTimestampQueue();
@@ -105,9 +111,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
+        // Arguments
         BaseStatusSignal.refreshAll(drivePosition,driveVelocity,driveAppliedVolts,
-                driveSupplyCurrent,driveStatorCurrent,driveTemp,turnAbsolutePosition,
-                turnPosition,turnVelocity,turnAppliedVolts,turnSupplyCurrent,
+                driveSupplyCurrent,driveStatorCurrent,driveTemp,
+                turnAbsolutePosition, turnPosition,turnVelocity,
+                turnAppliedVolts,turnSupplyCurrent,
                 turnStatorCurrent,turnTemp);
         // Drive
         inputs.driveConnected = drive.isConnected();
