@@ -36,6 +36,4 @@ public class AprilTagVisionConstants {
     public static final Rotation2d SIM_DIAGONAL_FOV = Rotation2d.fromDegrees(70);
     public static final double SIM_FPS = 25.0;
     public static final double SIM_AVG_LATENCY_MS = 12.5;
-
-
 }

@@ -17,15 +17,15 @@ public class AprilTagVisionIO {
     public static class AprilTagVisionIOInputs {
         public boolean connected = false;
         public PoseObservation[] poseObservations = new PoseObservation[0];
-        public SingleTagObservation[] singleTagObservations = new SingleTagObservation[0];
         public int[] seenTagIDs = new int[0];
     }
 
-    public record PoseObservation(Pose3d estimatedPoseMeters,
-                                  int numTagsSeen,
-                                  double avgTagDistance,
-                                  double timestampSecs,
-                                  double ambiguity) {}
+    public record PoseObservation(
+            Pose3d estimatedPoseMeters,
+            int numTagsSeen,
+            double avgTagDistance,
+            double timestampSecs,
+            double ambiguity) {}
 
     public record SingleTagObservation(
             int id,

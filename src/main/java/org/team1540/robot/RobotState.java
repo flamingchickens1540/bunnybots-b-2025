@@ -21,6 +21,8 @@ import org.littletonrobotics.junction.Logger;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionConstants;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionIO;
 
+import java.util.Optional;
+
 public class RobotState {
     private static RobotState instance = null;
 
@@ -40,7 +42,7 @@ public class RobotState {
 
     private Rotation2d lastGyroRotation = Rotation2d.kZero;
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
     };
 
     private Pose2d[] activeTrajectory;
@@ -109,16 +111,16 @@ public class RobotState {
         Pose3d estimatedPose = poseObservation.estimatedPoseMeters();
         return poseObservation.numTagsSeen() >= MIN_ACCEPTED_NUM_TAGS // Must see sufficient tags
                 && (poseObservation.numTagsSeen() > 1
-                || poseObservation.ambiguity() < MAX_AMBIGUITY) // Must be multiple tags or low ambiguity
+                        || poseObservation.ambiguity() < MAX_AMBIGUITY) // Must be multiple tags or low ambiguity
                 // Must be within field roughly
                 && estimatedPose.getX() >= -MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getX()
-                <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldLength()
-                + MAX_OUTSIDE_OF_FIELD_TOLERANCE
+                        <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldLength()
+                                + MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getY() >= -MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getY()
-                <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldWidth()
-                + MAX_OUTSIDE_OF_FIELD_TOLERANCE
+                        <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldWidth()
+                                + MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 // Must not be actively flying
                 && Math.abs(estimatedPose.getZ()) <= MAX_ROBOT_Z_TOLERANCE;
     }
