@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import jdk.jshell.Snippet;
 import org.team1540.robot.generated.TunerConstants;
 
@@ -15,7 +16,7 @@ public class GyroIOPigeon2 implements GyroIO{
 
     // Inputs From Gyro
     private final StatusSignal<Angle> gyroYaw;
-    private final StatusSignal<AnglularVelocity> gyroAngularVelocity;
+    private final StatusSignal<AngularVelocity> gyroAngularVelocity;
 
     // Timestamp
     private final Queue<Double> timeStampQueue;
@@ -28,15 +29,17 @@ public class GyroIOPigeon2 implements GyroIO{
         gyro.getConfigurator().apply(TunerConstants.DrivetrainConstants.Pigeon2Configs);
 
         // Zeroing
-        gyro.getConfigurator().setView(0.0);
+        gyro.getConfigurator().setYaw(0.0);
+
+        // Recieving Initial Inputs
+        gyroYaw = gyro.getYaw();
+        gyroAngularVelocity = gyro.getAngularVelocityZWorld();
 
         // Setting Update Frequency
         gyroYaw.setUpdateFrequency(DrivetrainConstants.FAST_UPDATE_FREQUENCY_HZ);
         gyroAngularVelocity.setUpdateFrequency(DrivetrainConstants.NORMAL_UPDATE_FREQUENCY_HZ);
 
-        // Recieving Initial Inputs
-        gyroYaw = gyro.getYaw();
-        gyroAngularVelocity = gyro.getAngularVelocityZWorld();
+
 
         // Odometry Queue
         yawQueue = OdometryThread.getInstance().registerSignal(gyroYaw);
