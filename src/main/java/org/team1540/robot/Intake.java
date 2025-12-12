@@ -1,14 +1,19 @@
 package org.team1540.robot;
 
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
     private static boolean hasInstance = false;
 
     private final IntakeIO io;
+    private final IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
+
+    private final Alert intakeDisconnectedAlert = new Alert("Intake roller disconnected", Alert.AlertType.kError);
 
     private Intake(IntakeIO io) {
         if (hasInstance) throw new IllegalStateException("Instance of intake already exists");
@@ -17,15 +22,16 @@ public class Intake extends SubsystemBase {
     }
 
     public void periodic() {
-        // FIGURE THIS OUT
-        //LoggedTracer.reset();
+        // LoggedTracer.reset();
 
-        //io.updateInputs(inputs);
-        //Logger.processInputs("Intake", inputs);
+        io.updateInputs(inputs);
+        Logger.processInputs("Intake", inputs);
 
         if (DriverStation.isDisabled()) stopAll();
 
-        //LoggedTracer.record("Intake");
+        // LoggedTracer.record("Intake");
+
+        intakeDisconnectedAlert.set(!inputs.intakeConnected);
     }
 
     public void setIntakeVoltage(double voltage) {

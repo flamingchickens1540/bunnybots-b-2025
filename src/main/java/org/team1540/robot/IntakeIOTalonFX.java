@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX intakeFalcon = new TalonFX(IntakeConstants.DEVICE_ID);
+    public boolean intakeConnected = true;
     private final StatusSignal<AngularVelocity> intakeVelocity = intakeFalcon.getVelocity();
     private final StatusSignal<Voltage> intakeAppliedVoltage = intakeFalcon.getMotorVoltage();
     private final StatusSignal<Current> intakeSupplyCurrent = intakeFalcon.getSupplyCurrent();
@@ -33,12 +34,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeTalonFXConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-                50.0,
-                intakeVelocity,
-                intakeAppliedVoltage,
-                intakeSupplyCurrent,
-                intakeStatorCurrent,
-                intakeTemp); {
+                50.0, intakeVelocity, intakeAppliedVoltage, intakeSupplyCurrent, intakeStatorCurrent, intakeTemp);
+        {
             intakeFalcon.optimizeBusUtilization();
         }
     }
@@ -56,5 +53,6 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.intakeMotorAppliedVolts = intakeAppliedVoltage.getValueAsDouble();
         inputs.intakeSupplyCurrentAmps = intakeSupplyCurrent.getValueAsDouble();
         inputs.intakeStatorCurrentAmps = intakeStatorCurrent.getValueAsDouble();
+        inputs.intakeTemp = intakeTemp.getValueAsDouble();
     }
 }
