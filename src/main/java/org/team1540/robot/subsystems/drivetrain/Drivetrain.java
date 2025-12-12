@@ -122,6 +122,8 @@ public class Drivetrain extends SubsystemBase {
             for (int i = 0; i < 4; i++) {
                 modules[i].runSetpoint(setpointStates[i]);
             }
+            Logger.recordOutput("Drivetrain/SwerveStates/Setpoints", setpointStates);
+
         } else {
             for (Module module : modules) module.stop(); // Stop modules when disabled
             Logger.recordOutput(

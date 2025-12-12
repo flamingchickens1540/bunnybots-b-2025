@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import org.littletonrobotics.junction.Logger;
 // import org.team1540.robot.FieldConstants;
+import org.team1540.robot.Constants;
 import org.team1540.robot.RobotState;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionIO.PoseObservation;
 
@@ -61,7 +62,7 @@ public class AprilTagVision {
                 }
 
                 lastSeenTagPoses.addAll(Arrays.stream(cameraInputs[count].seenTagIDs).mapToObj(
-                        tagID -> fieldConstants.aprilTagLayout.getTagPose(tagID).orElse(Pose3d.kZero)).toList());
+                        tagID -> AprilTagVisionConstants.FieldConstants.aprilTagFieldLayout.getTagPose(tagID).orElse(Pose3d.kZero)).toList());
             }
 
             Logger.recordOutput("Vision/AcceptedPoses", lastAcceptedPoses.toArray(new Pose3d[0]));

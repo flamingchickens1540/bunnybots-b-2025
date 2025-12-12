@@ -1,7 +1,10 @@
 package org.team1540.robot.subsystems.drivetrain;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.Queue;
@@ -39,5 +42,20 @@ public class GyroIOPigeon2 implements GyroIO {
         // Odometry Queue
         yawQueue = OdometryThread.getInstance().registerSignal(gyroYaw);
         timeStampQueue = OdometryThread.getInstance().makeTimestampQueue();
+    }
+
+    @Override
+    public void updateInputs(GyroIOInputs inputs) {
+        BaseStatusSignal.refreshAll(gyroAngularVelocity, gyroYaw);
+        inputs.odometryTimeStamps =
+                timeStampQueue.stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.odometryGyroYaw =
+                yawQueue.stream().map(Rotation2d::fromRotations).toArray(Rotation2d[]::new);
+        yawQueue.clear();
+        timeStampQueue.clear();
+
+        inputs.connectedGyro = gyro.isConnected();
+        inputs.yawPosition = Rotation2d.fromRotations(gyroYaw.getValueAsDouble());
+        inputs.yawVelocityRadPerSec = Units.degreesToRadians(gyroAngularVelocity.getValueAsDouble());
     }
 }

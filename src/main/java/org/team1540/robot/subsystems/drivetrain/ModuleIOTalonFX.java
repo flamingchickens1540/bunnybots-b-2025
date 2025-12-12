@@ -19,6 +19,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.Queue;
+
+import org.team1540.robot.generated.TunerConstants;
 import org.team1540.robot.util.swerve.ModuleHWConfigs;
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -55,6 +57,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final VoltageOut driveVoltageRequest = new VoltageOut(0);
     private final VoltageOut turnVoltageRequest = new VoltageOut(0);
 
+
+
+    private final VoltageOut driveVoltReq = new VoltageOut(0).withEnableFOC(true);
+    private final VelocityVoltage driveVelReq = new VelocityVoltage(0).withEnableFOC(true);
+    private final VoltageOut turnVoltReq = new VoltageOut(0).withEnableFOC(true);
+    private final PositionVoltage turnPosReq = new PositionVoltage(0).withEnableFOC(true);
     private final TalonFXConfiguration driveConfig;
     private final TalonFXConfiguration turnConfig;
 
@@ -65,9 +73,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         // Implementing Constants
         this.constants = constants;
         ModuleHWConfigs hw = ModuleHWConfigs.fromModuleConstants(constants);
-        drive = new TalonFX(constants.DriveMotorId, String.valueOf(constants.DriveMotorId));
-        turn = new TalonFX(constants.SteerMotorId, String.valueOf(constants.SteerMotorId));
-        cancoder = new CANcoder(constants.EncoderId, String.valueOf(constants.EncoderId));
+        drive = new TalonFX(constants.DriveMotorId, TunerConstants.kCANBus);
+        turn = new TalonFX(constants.SteerMotorId, TunerConstants.kCANBus);
+        cancoder = new CANcoder(constants.EncoderId, TunerConstants.kCANBus);
 
         driveConfig = hw.driveConfig();
         turnConfig = hw.turnConfig();
@@ -114,6 +122,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
                 DrivetrainConstants.ODOMETRY_FREQUENCY_HZ, drivePosition, turnPosition);
     }
+
+
+
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
@@ -179,7 +190,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     @Override
-    public void setDriveVelocity(boolean enabled) {
+    public void setBrakeMode(boolean enabled) {
         driveConfig.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
         drive.getConfigurator().apply(driveConfig.MotorOutput);
         turnConfig.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
