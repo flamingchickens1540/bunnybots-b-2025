@@ -1,17 +1,14 @@
 package org.team1540.robot.subsystems.vision.apriltag;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.*;
+// import org.team1540.robot.FieldConstants;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
-import java.util.*;
-// import org.team1540.robot.FieldConstants;
 
 public class AprilTagVisionIOPhoton extends AprilTagVisionIO {
 
@@ -27,7 +24,10 @@ public class AprilTagVisionIOPhoton extends AprilTagVisionIO {
         this.camera = new PhotonCamera(name);
         this.cameraTransformMeters = cameraTransformMeters;
 
-        poseEstimator = new PhotonPoseEstimator(fieldConstants.aprilTagLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraTransformMeters);
+        poseEstimator = new PhotonPoseEstimator(
+                AprilTagVisionConstants.FieldConstants.aprilTagFieldLayout,
+                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                cameraTransformMeters);
         poseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
     }
 
@@ -47,20 +47,22 @@ public class AprilTagVisionIOPhoton extends AprilTagVisionIO {
                 double totalAmbiguity = 0.0;
 
                 for (PhotonTrackedTarget target : poseEstimatorResult.get().targetsUsed) {
-                    totalDistance += target.getBestCameraToTarget().getTranslation().getNorm();
+                    totalDistance +=
+                            target.getBestCameraToTarget().getTranslation().getNorm();
                     totalAmbiguity += target.poseAmbiguity;
                 }
 
-                poseObservations.add(new PoseObservation(robotPose,
+                poseObservations.add(new PoseObservation(
+                        robotPose,
                         poseEstimatorResult.get().targetsUsed.size(),
                         (totalDistance / poseEstimatorResult.get().targetsUsed.size()),
                         poseEstimatorResult.get().timestampSeconds,
                         (totalAmbiguity / poseEstimatorResult.get().targetsUsed.size())));
             }
 
-            inputs.seenTagIDs = lastSeenTagIDs.stream().mapToInt(Integer::intValue).toArray();
+            inputs.seenTagIDs =
+                    lastSeenTagIDs.stream().mapToInt(Integer::intValue).toArray();
             inputs.poseObservations = poseObservations.toArray(new PoseObservation[0]);
         }
     }
-
 }

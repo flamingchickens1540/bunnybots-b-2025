@@ -11,9 +11,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
-
 import org.team1540.robot.generated.TunerConstants;
-
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
@@ -105,12 +103,12 @@ public class OdometryThread extends Thread {
             signalsLock.lock();
             try {
                 if (isCANFD && phoenixSignals.length > 0) {
-                    BaseStatusSignal.waitForAll(2.0 / DrivetrainConstants.FAST_UPDATE_FREQUENCY_HZ, phoenixSignals);
+                    BaseStatusSignal.waitForAll(2.0 / DrivetrainConstants.ODOMETRY_FREQUENCY_HZ, phoenixSignals);
                 } else {
                     // "waitForAll" does not support blocking on multiple signals with a bus
                     // that is not CAN FD, regardless of Pro licensing. No reasoning for this
                     // behavior is provided by the documentation.
-                    Thread.sleep((long) (1000.0 / DrivetrainConstants.FAST_UPDATE_FREQUENCY_HZ));
+                    Thread.sleep((long) (1000.0 / DrivetrainConstants.ODOMETRY_FREQUENCY_HZ));
                     if (phoenixSignals.length > 0) BaseStatusSignal.refreshAll(phoenixSignals);
                 }
             } catch (InterruptedException e) {

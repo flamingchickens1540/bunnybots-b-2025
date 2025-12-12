@@ -1,21 +1,29 @@
 package org.team1540.robot.subsystems.drivetrain;
 
+import static org.team1540.robot.subsystems.drivetrain.DrivetrainConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.team1540.robot.Constants;
 import org.team1540.robot.RobotState;
 import org.team1540.robot.generated.TunerConstants;
-
-import java.util.concurrent.locks.ReentrantLock;
-
-import static org.team1540.robot.subsystems.drivetrain.DrivetrainConstants.MAX_LINEAR_SPEED_MPS;
-import static org.team1540.robot.subsystems.drivetrain.DrivetrainConstants.MAX_STEER_SPEED_RAD_PER_SEC;
+import org.team1540.robot.util.JoystickUtil;
 
 public class Drivetrain extends SubsystemBase {
     public static ReentrantLock odometryLock = new ReentrantLock();
@@ -23,7 +31,6 @@ public class Drivetrain extends SubsystemBase {
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4];
-
 
     private Rotation2d fieldOrrientatedOffset = Rotation2d.kZero;
 
@@ -33,11 +40,11 @@ public class Drivetrain extends SubsystemBase {
     private double lastOdometryUpdateTime = 0.0;
     private final SwerveDriveKinematics kinematics = RobotState.getInstance().getKinematics();
 
-
     @AutoLogOutput(key = "Drivetrain/DesiredSpeeds")
     private ChassisSpeeds desiredSpeeds = new ChassisSpeeds();
 
-    public Drivetrain(GyroIO gyroIO, ModuleIO flModuleIO, ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
+    public Drivetrain(
+            GyroIO gyroIO, ModuleIO flModuleIO, ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
         this.gyroIO = gyroIO;
         modules[0] = new Module(flModuleIO, Module.MountPosition.FL, TunerConstants.FrontLeft);
         modules[1] = new Module(frModuleIO, Module.MountPosition.FR, TunerConstants.FrontRight);
@@ -78,12 +85,12 @@ public class Drivetrain extends SubsystemBase {
             for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
                 double velocity = moduleDeltas[i].distanceMeters / deltaTime;
                 double turnVelocity = modulePositions[moduleIndex]
-                        .angle
-                        .minus(lastModulePositions[moduleIndex]
-                                .angle)
-                        .getRadians() / deltaTime;
-                if (Math.abs(velocity) > MAX_LINEAR_SPEED_MPS * 2 ||
-                        Math.abs(turnVelocity) > MAX_STEER_SPEED_RAD_PER_SEC * 2) {
+                                .angle
+                                .minus(lastModulePositions[moduleIndex].angle)
+                                .getRadians()
+                        / deltaTime;
+                if (Math.abs(velocity) > MAX_LINEAR_SPEED_MPS * 2
+                        || Math.abs(turnVelocity) > MAX_STEER_SPEED_RAD_PER_SEC * 2) {
                     goodMeasurements = false;
                     break;
                 }
@@ -101,10 +108,88 @@ public class Drivetrain extends SubsystemBase {
                 rejectedSamples++;
             }
         }
-        Logger.recordOutput("OddometryBadData",rejectedSamples);
+        Logger.recordOutput("OddometryBadData", rejectedSamples);
+
+        ChassisSpeeds speeds = kinematics.toChassisSpeeds(getModuleStates());
+        speeds.omegaRadiansPerSecond =
+                gyroInputs.connectedGyro ? gyroInputs.yawVelocityRadPerSec : speeds.omegaRadiansPerSecond;
+        RobotState.getInstance().addVelocityData(speeds);
+
+        if (DriverStation.isEnabled()) {
+            SwerveModuleState[] setpointStates;
+            setpointStates = kinematics.toSwerveModuleStates(
+                    ChassisSpeeds.discretize(desiredSpeeds, Constants.LOOP_PERIOD_SECS));
+            for (int i = 0; i < 4; i++) {
+                modules[i].runSetpoint(setpointStates[i]);
+            }
+        } else {
+            for (Module module : modules) module.stop(); // Stop modules when disabled
+            Logger.recordOutput(
+                    "Drivetrain/SwerveStates/Setpoints",
+                    new SwerveModuleState(),
+                    new SwerveModuleState(),
+                    new SwerveModuleState(),
+                    new SwerveModuleState());
+        }
+    }
+
+    private void runVelocity(ChassisSpeeds speeds) {
+        desiredSpeeds = speeds;
+    }
+
+    public void stop() {
+        runVelocity(new ChassisSpeeds());
+    }
+
+    public void stopWithX() {
+        Rotation2d[] headings = new Rotation2d[4];
+
+        Translation2d[] modulePositions = getModuleTranslations();
+        for (int i = 0; i < 4; i++) headings[i] = modulePositions[i].getAngle();
+        kinematics.resetHeadings(headings);
+        stop();
+    }
+
+    public void zeroFieldOrientationManual() {
+
+        fieldOrrientatedOffset = rawGyroRotation;
+    }
+
+    public void setBrakeMode(boolean enabled) {
+        for (Module module : modules) module.setBrakeMode(enabled);
+    }
+
+    @AutoLogOutput(key = "Drivetrain/SwerveStates/Measured")
+    public SwerveModuleState[] getModuleStates() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < 4; i++) {
+            states[i] = modules[i].getState();
+        }
+        return states;
+    }
+
+    public Command percentDriveCommand(
+            Supplier<Translation2d> linearPercent, DoubleSupplier omegaPercent, BooleanSupplier fieldRelative) {
+        return Commands.run(
+                        () -> {
+                            var speeds = new ChassisSpeeds(
+                                    linearPercent.get().getX() * MAX_LINEAR_SPEED_MPS,
+                                    linearPercent.get().getY() * MAX_LINEAR_SPEED_MPS,
+                                    omegaPercent.getAsDouble() * MAX_ANGULAR_SPEED_RAD_PER_SEC);
+                            if (fieldRelative.getAsBoolean()) {
+                                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        speeds, rawGyroRotation.minus(fieldOrrientatedOffset));
+                            }
+                            runVelocity(speeds);
+                        },
+                        this)
+                .finallyDo(this::stop);
+    }
+
+    public Command teleopDriveCommand(XboxController controller, BooleanSupplier fieldRelative) {
+        return percentDriveCommand(
+                () -> JoystickUtil.deadzonedJoystickTranslation(-controller.getLeftY(), -controller.getLeftX(), 0.1),
+                () -> JoystickUtil.smartDeadzone(-controller.getRightX(), 0.1),
+                fieldRelative);
     }
 }
-
-
-
-

@@ -18,10 +18,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.Logger;
+import org.team1540.robot.subsystems.drivetrain.DrivetrainConstants;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionConstants;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionIO;
-
-import java.util.Optional;
 
 public class RobotState {
     private static RobotState instance = null;
@@ -32,7 +31,7 @@ public class RobotState {
     }
 
     private final SwerveDriveKinematics kinematics =
-            new SwerveDriveKinematics(drivetrain.DrivetrainConstants.getModuleTranslations());
+            new SwerveDriveKinematics(DrivetrainConstants.getModuleTranslations());
     private final SwerveDrivePoseEstimator poseEstimator;
     private ChassisSpeeds robotVelocity = new ChassisSpeeds();
 
@@ -115,11 +114,11 @@ public class RobotState {
                 // Must be within field roughly
                 && estimatedPose.getX() >= -MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getX()
-                        <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldLength()
+                        <= AprilTagVisionConstants.FieldConstants.aprilTagFieldLayout.getFieldLength()
                                 + MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getY() >= -MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 && estimatedPose.getY()
-                        <= AprilTagVisionConstants.FieldConstants.aprilTagLayout.getFieldWidth()
+                        <= AprilTagVisionConstants.FieldConstants.aprilTagFieldLayout.getFieldWidth()
                                 + MAX_OUTSIDE_OF_FIELD_TOLERANCE
                 // Must not be actively flying
                 && Math.abs(estimatedPose.getZ()) <= MAX_ROBOT_Z_TOLERANCE;

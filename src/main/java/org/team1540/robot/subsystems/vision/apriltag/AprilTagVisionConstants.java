@@ -1,11 +1,31 @@
 package org.team1540.robot.subsystems.vision.apriltag;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
+import java.io.IOException;
 
 public class AprilTagVisionConstants {
+    public class FieldConstants {
+        public static final double fieldLength = Units.inchesToMeters(690.876);
+        public static final double fieldWidth = Units.inchesToMeters(317);
+        public static AprilTagFieldLayout aprilTagFieldLayout;
+
+        static {
+            try {
+                aprilTagFieldLayout = new AprilTagFieldLayout(Filesystem.getDeployDirectory()
+                        .toPath()
+                        .resolve("2025-bunnybots.json")
+                        .toString());
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     // Constants +x is front, +y is right(?), +z is up
 

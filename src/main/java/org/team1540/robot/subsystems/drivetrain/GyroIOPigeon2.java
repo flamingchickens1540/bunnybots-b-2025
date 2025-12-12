@@ -2,15 +2,12 @@ package org.team1540.robot.subsystems.drivetrain;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import jdk.jshell.Snippet;
+import java.util.Queue;
 import org.team1540.robot.generated.TunerConstants;
 
-import java.util.Queue;
-
-public class GyroIOPigeon2 implements GyroIO{
+public class GyroIOPigeon2 implements GyroIO {
     // Gyro
     private final Pigeon2 gyro = new Pigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, TunerConstants.kCANBus);
 
@@ -24,7 +21,7 @@ public class GyroIOPigeon2 implements GyroIO{
     // Queue
     private final Queue<Double> yawQueue;
 
-    public GyroIOPigeon2 () {
+    public GyroIOPigeon2() {
         // Loading Configurations
         gyro.getConfigurator().apply(TunerConstants.DrivetrainConstants.Pigeon2Configs);
 
@@ -36,15 +33,11 @@ public class GyroIOPigeon2 implements GyroIO{
         gyroAngularVelocity = gyro.getAngularVelocityZWorld();
 
         // Setting Update Frequency
-        gyroYaw.setUpdateFrequency(DrivetrainConstants.FAST_UPDATE_FREQUENCY_HZ);
-        gyroAngularVelocity.setUpdateFrequency(DrivetrainConstants.NORMAL_UPDATE_FREQUENCY_HZ);
-
-
+        gyroYaw.setUpdateFrequency(DrivetrainConstants.ODOMETRY_FREQUENCY_HZ);
+        gyroAngularVelocity.setUpdateFrequency(DrivetrainConstants.OTHER_FREQUENCY_HZ);
 
         // Odometry Queue
         yawQueue = OdometryThread.getInstance().registerSignal(gyroYaw);
         timeStampQueue = OdometryThread.getInstance().makeTimestampQueue();
     }
-
-
 }
