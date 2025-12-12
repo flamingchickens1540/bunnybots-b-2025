@@ -5,6 +5,8 @@ import static org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionConsta
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Alert;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.littletonrobotics.junction.Logger;
 // import org.team1540.robot.FieldConstants;
 import org.team1540.robot.RobotState;
@@ -58,9 +60,8 @@ public class AprilTagVision {
                     lastRejectedPoses.add(observation.estimatedPoseMeters());
                 }
 
-                //                lastSeenTagPoses.addAll(Arrays.stream(cameraInputs[count].seenTagIDs).mapToObj(tagID
-                // -> aprilTaglayout).toList())
-                // tagID -> fieldConstants.aprilTagLayout.getTagPose(tagID).orElse(Pose3D.kzero)
+                lastSeenTagPoses.addAll(Arrays.stream(cameraInputs[count].seenTagIDs).mapToObj(
+                        tagID -> fieldConstants.aprilTagLayout.getTagPose(tagID).orElse(Pose3d.kZero)).toList());
             }
 
             Logger.recordOutput("Vision/AcceptedPoses", lastAcceptedPoses.toArray(new Pose3d[0]));
@@ -75,7 +76,7 @@ public class AprilTagVision {
                 new AprilTagVisionIOPhoton(FR_CAMERA_NAME, FR_CAMERA_TRANSFORM));
     }
 
-    public static AprilTagVision createIO() {
+    public static AprilTagVision createDummyIO() {
         return new AprilTagVision(new AprilTagVisionIO(FL_CAMERA_NAME), new AprilTagVisionIO(FR_CAMERA_NAME));
     }
 }
