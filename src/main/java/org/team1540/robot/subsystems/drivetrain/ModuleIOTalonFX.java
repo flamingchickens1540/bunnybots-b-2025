@@ -77,7 +77,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         // Recieving Initial Inputs
         drivePosition = drive.getPosition();
-        // dzrivePositionQueue = drive.getPosition
+
         driveVelocity = drive.getVelocity();
         driveAppliedVolts = drive.getMotorVoltage();
         driveSupplyCurrent = drive.getSupplyCurrent();
@@ -86,7 +86,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         turnAbsolutePosition = cancoder.getAbsolutePosition();
         turnPosition = turn.getPosition();
-        // turnPositionQueue = something
+
         turnVelocity = turn.getVelocity();
         turnAppliedVolts = turn.getMotorVoltage();
         turnSupplyCurrent = turn.getSupplyCurrent();
