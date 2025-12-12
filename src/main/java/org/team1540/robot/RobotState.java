@@ -128,22 +128,6 @@ public class RobotState {
         robotVelocity = velocity;
     }
 
-    public void setActiveTrajectory(Pose2d... poses) {
-        activeTrajectory = poses;
-        field.getObject("trajectory").setPoses(activeTrajectory);
-        Logger.recordOutput("Odometry/Trajectory/ActiveTrajectory", activeTrajectory);
-    }
-
-    public void clearActiveTrajectory() {
-        field.getObject("trajectory").setPoses();
-        Logger.recordOutput("Odometry/Trajectory/ActiveTrajectory", new Pose2d[0]);
-        activeTrajectory = null;
-    }
-
-    public void setTrajectoryTarget(Pose2d target) {
-        Logger.recordOutput("Odometry/Trajectory/TargetPose", target);
-    }
-
     public void resetPose(Pose2d newPose) {
         poseEstimator.resetPosition(lastGyroRotation, lastModulePositions, newPose);
         odometryPose = newPose;
