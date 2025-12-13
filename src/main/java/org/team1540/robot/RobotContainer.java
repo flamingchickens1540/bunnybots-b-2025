@@ -88,13 +88,13 @@ public class RobotContainer {
         new Trigger(shooter::areFlywheelsSpunUp).onTrue(JoystickUtil.rumbleCommand(driver.getHID(), 1, 0.5));
 
         copilot.rightStick()
-                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() + 100, 0, 5500))));
+                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() + 100, 0, 5500))).ignoringDisable(true));
         copilot.leftStick()
-                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() - 100, 0, 5500))));
+                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() - 100, 0, 5500))).ignoringDisable(true));
         copilot.povUp()
-                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() + 0.01, 0.5, 0.9))));
+                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() + 0.01, 0.5, 0.9))).ignoringDisable(true));
         copilot.povDown()
-                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() - 0.01, 0.5, 0.9))));
+                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() - 0.01, 0.5, 0.9))).ignoringDisable(true));
 
         DoubleSupplier copilotTriggerAxis = () -> copilot.getRightTriggerAxis() - copilot.getLeftTriggerAxis();
         intake.setDefaultCommand(intake.runCommand(copilotTriggerAxis));
