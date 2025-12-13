@@ -22,8 +22,8 @@ import org.team1540.robot.util.JoystickUtil;
 
 public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
-    private final LoggedNetworkNumber topRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/TopRPM", 4000);
-    private final LoggedNetworkNumber bottomRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/BottomRPM", 2000);
+    private final LoggedNetworkNumber shooterRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/RPM", 3000);
+    private final LoggedNetworkNumber shooterBias = new LoggedNetworkNumber("SmartDashboard/Shooter/RPMBias", 0.67);
     private final LoggedNetworkBoolean useVisionAiming =
             new LoggedNetworkBoolean("SmartDashboard/Drivetrain/UseVisionAiming", true);
 
@@ -70,11 +70,14 @@ public class RobotContainer {
                 .whileTrue(intake.runCommand(() -> -0.5)
                         .alongWith(indexer.runCommand(() -> -0.2), feeder.runCommand(() -> -0.5, () -> -0.5)));
 
+        DoubleSupplier topRPM = () -> 2 * shooterRPM.get() * shooterBias.get();
+        DoubleSupplier bottomRPM = () -> 2 * shooterRPM.get() * (1 - shooterBias.get());
+
         Command shootPrepareCommand = Commands.either(
-                shooter.commandToSpeed(topRPM::get, bottomRPM::get)
+                shooter.commandToSpeed(topRPM, bottomRPM)
                         .withDeadline(drivetrain.teleopDriveWithHeadingCommand(
                                 driver.getHID(), RobotState.getInstance()::getAimingHeading, () -> true)),
-                shooter.commandToSpeed(topRPM::get, bottomRPM::get),
+                shooter.commandToSpeed(topRPM, bottomRPM),
                 useVisionAiming::get);
         driver.rightBumper().toggleOnTrue(shootPrepareCommand);
         driver.rightTrigger()
@@ -84,14 +87,15 @@ public class RobotContainer {
 
         new Trigger(shooter::areFlywheelsSpunUp).onTrue(JoystickUtil.rumbleCommand(driver.getHID(), 1, 0.5));
 
-        copilot.povUp().onTrue(Commands.runOnce(() -> {
-            topRPM.set(MathUtil.clamp(topRPM.get() + 200, 0, 5500));
-            bottomRPM.set(MathUtil.clamp(bottomRPM.get() + 100, 0, 2700));
-        }));
-        copilot.povDown().onTrue(Commands.runOnce(() -> {
-            topRPM.set(MathUtil.clamp(topRPM.get() - 200, 0, 5500));
-            bottomRPM.set(MathUtil.clamp(bottomRPM.get() - 100, 0, 2700));
-        }));
+        copilot.rightStick()
+                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() + 100, 0, 5500))));
+        copilot.leftStick()
+                .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() - 100, 0, 5500))));
+        copilot.povUp()
+                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() + 0.01, 0.5, 0.9))));
+        copilot.povDown()
+                .onTrue(Commands.runOnce(() -> shooterBias.set(MathUtil.clamp(shooterBias.get() - 0.01, 0.5, 0.9))));
+
         DoubleSupplier copilotTriggerAxis = () -> copilot.getRightTriggerAxis() - copilot.getLeftTriggerAxis();
         intake.setDefaultCommand(intake.runCommand(copilotTriggerAxis));
         indexer.setDefaultCommand(indexer.runCommand(copilotTriggerAxis));

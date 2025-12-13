@@ -4,10 +4,9 @@ import static org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionConsta
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.team1540.robot.RobotState;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionIO.PoseObservation;
