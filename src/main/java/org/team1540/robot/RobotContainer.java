@@ -23,8 +23,8 @@ import org.team1540.robot.util.JoystickUtil;
 
 public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
-    private final LoggedNetworkNumber shooterRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/RPM", 3000);
-    private final LoggedNetworkNumber shooterBias = new LoggedNetworkNumber("SmartDashboard/Shooter/RPMBias", 0.67);
+    private final LoggedNetworkNumber shooterRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/RPM", 3200);
+    private final LoggedNetworkNumber shooterBias = new LoggedNetworkNumber("SmartDashboard/Shooter/RPMBias", 0.69);
     private final LoggedNetworkBoolean useVisionAiming =
             new LoggedNetworkBoolean("SmartDashboard/Drivetrain/UseVisionAiming", true);
 
@@ -91,10 +91,6 @@ public class RobotContainer {
                 .and(shooter::areFlywheelsSpunUp)
                 .whileTrue(feeder.runCommand(() -> 0.5, () -> 0.5).alongWith(indexer.runCommand(() -> 0.2)));
 
-        new Trigger(shooter::areFlywheelsSpunUp)
-                .and(shootPrepareCommand::isScheduled)
-                .onTrue(JoystickUtil.rumbleCommand(driver.getHID(), 1, 0.5));
-
         copilot.rightStick()
                 .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() + 100, 0, 5500)))
                         .ignoringDisable(true));
@@ -123,6 +119,7 @@ public class RobotContainer {
                             () -> (1 / 60.0) * (shooter.getTopFlywheelSpeed() + shooter.getBottomFlywheelSpeed()) / 2.0,
                             shooter));
         }
+        autoChooser.addDefaultOption("None", Commands.none());
     }
 
     /**
