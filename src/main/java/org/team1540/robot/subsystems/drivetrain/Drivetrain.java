@@ -25,6 +25,7 @@ import org.littletonrobotics.junction.Logger;
 import org.team1540.robot.Constants;
 import org.team1540.robot.RobotState;
 import org.team1540.robot.generated.TunerConstants;
+import org.team1540.robot.util.AllianceFlipUtil;
 import org.team1540.robot.util.JoystickUtil;
 import org.team1540.robot.util.LoggedTunableNumber;
 
@@ -167,8 +168,12 @@ public class Drivetrain extends SubsystemBase {
         stop();
     }
 
-    public void zeroFieldOrientationManual() {
+    public void zeroFieldOrientation() {
+        fieldOrientatedOffset = rawGyroRotation.minus(
+                AllianceFlipUtil.apply(RobotState.getInstance().getRobotRotation()));
+    }
 
+    public void zeroFieldOrientationManual() {
         fieldOrientatedOffset = rawGyroRotation;
     }
 

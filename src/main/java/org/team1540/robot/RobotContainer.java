@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -19,11 +20,10 @@ import org.team1540.robot.subsystems.intake.IntakeIO;
 import org.team1540.robot.subsystems.intake.IntakeIOTalonFX;
 import org.team1540.robot.subsystems.shooter.Shooter;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVision;
-import org.team1540.robot.util.JoystickUtil;
 
 public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
-    private final LoggedNetworkNumber shooterRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/RPM", 3200);
+    private final LoggedNetworkNumber shooterRPM = new LoggedNetworkNumber("SmartDashboard/Shooter/RPM", 3400);
     private final LoggedNetworkNumber shooterBias = new LoggedNetworkNumber("SmartDashboard/Shooter/RPMBias", 0.69);
     private final LoggedNetworkBoolean useVisionAiming =
             new LoggedNetworkBoolean("SmartDashboard/Drivetrain/UseVisionAiming", true);
@@ -108,6 +108,8 @@ public class RobotContainer {
         intake.setDefaultCommand(intake.runCommand(copilotTriggerAxis));
         indexer.setDefaultCommand(indexer.runCommand(copilotTriggerAxis));
         feeder.setDefaultCommand(feeder.runCommand(copilotTriggerAxis, copilotTriggerAxis));
+
+        RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroFieldOrientation));
     }
 
     private void configureAutoRoutines() {
