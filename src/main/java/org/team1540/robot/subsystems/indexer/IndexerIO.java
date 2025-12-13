@@ -15,4 +15,8 @@ public interface IndexerIO {
     default void setIndexerVoltage(double voltage) {}
 
     default void updateInputs(IndexerInputs inputs) {}
+
+    default boolean isConnected() {
+        return false;
+    }
 }
