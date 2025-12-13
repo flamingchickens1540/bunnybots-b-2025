@@ -33,15 +33,15 @@ public class AprilTagVisionConstants {
     public static final String FR_CAMERA_NAME = "front-right";
 
     public static final Transform3d FL_CAMERA_TRANSFORM = new Transform3d(
-            Units.inchesToMeters(10.183090),
-            Units.inchesToMeters(-10.708983),
+            Units.inchesToMeters(10.092643),
+            Units.inchesToMeters(-11.378815),
             Units.inchesToMeters(8.351960),
-            new Rotation3d(0.0, Math.toRadians(-19), Math.toRadians(-10)));
+            new Rotation3d(0.0, Math.toRadians(-30), 0.0));
     public static final Transform3d FR_CAMERA_TRANSFORM = new Transform3d(
-            Units.inchesToMeters(10.183090),
-            Units.inchesToMeters(10.708983),
+            Units.inchesToMeters(10.092643),
+            Units.inchesToMeters(11.378815),
             Units.inchesToMeters(8.351960),
-            new Rotation3d(0.0, Math.toRadians(-19), Math.toRadians(10)));
+            new Rotation3d(0.0, Math.toRadians(-30), 0.0));
 
     public static final double XY_STD_DEV_COEFF = 0.15;
     public static final double ROT_STD_DEV_COEFF = 0.25;
