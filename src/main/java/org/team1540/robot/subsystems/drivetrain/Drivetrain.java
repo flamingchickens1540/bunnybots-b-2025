@@ -203,8 +203,8 @@ public class Drivetrain extends SubsystemBase {
 
     public Command teleopDriveCommand(XboxController controller, BooleanSupplier fieldRelative) {
         return percentDriveCommand(
-                () -> JoystickUtil.deadzonedJoystickTranslation(-controller.getLeftY(), -controller.getLeftX(), 0.1),
-                () -> JoystickUtil.smartDeadzone(-controller.getRightX(), 0.1),
+                () -> JoystickUtil.deadzonedJoystickTranslation(-controller.getLeftY(), -controller.getLeftX(), 0.15),
+                () -> JoystickUtil.smartDeadzone(-controller.getRightX(), 0.15),
                 fieldRelative);
     }
 
@@ -212,7 +212,7 @@ public class Drivetrain extends SubsystemBase {
             XboxController controller, Supplier<Rotation2d> heading, BooleanSupplier fieldRelative) {
         return percentDriveCommand(
                         () -> JoystickUtil.deadzonedJoystickTranslation(
-                                -controller.getLeftY(), -controller.getLeftX(), 0.1),
+                                -controller.getLeftY(), -controller.getLeftX(), 0.15),
                         () -> headingController.calculate(
                                         RobotState.getInstance()
                                                 .getRobotRotation()
