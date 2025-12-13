@@ -1,5 +1,7 @@
 package org.team1540.robot.subsystems.shooter;
 
+import static org.team1540.robot.subsystems.shooter.ShooterConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -10,16 +12,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-
-import static org.team1540.robot.subsystems.shooter.ShooterConstants.*;
-
-import java.io.ObjectInputFilter.Status;
-
 
 public class FlywheelsIOTalonFX implements FlywheelsIO {
     private final TalonFX topMotor = new TalonFX(TOP_ID);
@@ -39,16 +35,14 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
 
     // basically PID
     private final VelocityVoltage topVelocityCtrlReq =
-        new VelocityVoltage(0).withEnableFOC(true).withSlot(0);
-    private final VoltageOut topVoltageCtrlReq =
-        new VoltageOut(0).withEnableFOC(true);
+            new VelocityVoltage(0).withEnableFOC(true).withSlot(0);
+    private final VoltageOut topVoltageCtrlReq = new VoltageOut(0).withEnableFOC(true);
 
     private final VelocityVoltage bottomVelocityCtrlReq =
-        new VelocityVoltage(0).withEnableFOC(true).withSlot(0);
-    private final VoltageOut bottomVoltageCtrlReq =
-        new VoltageOut(0).withEnableFOC(true);
+            new VelocityVoltage(0).withEnableFOC(true).withSlot(0);
+    private final VoltageOut bottomVoltageCtrlReq = new VoltageOut(0).withEnableFOC(true);
 
-    public FlywheelsIOTalonFX(){
+    public FlywheelsIOTalonFX() {
         TalonFXConfiguration topConfig = new TalonFXConfiguration();
         TalonFXConfiguration bottomConfig = new TalonFXConfiguration();
 
@@ -56,13 +50,13 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
         topConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         bottomConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         bottomConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        
+
         topConfig.Voltage.PeakForwardVoltage = VELOCITY_LIMITS;
         topConfig.Voltage.PeakReverseVoltage = VELOCITY_LIMITS;
         bottomConfig.Voltage.PeakForwardVoltage = VELOCITY_LIMITS;
         bottomConfig.Voltage.PeakReverseVoltage = VELOCITY_LIMITS;
-        
-        //shooter current limits are banned. forever.
+
+        // shooter current limits are banned. forever.
         topConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
         topConfig.CurrentLimits.StatorCurrentLimitEnable = false;
         bottomConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
@@ -90,45 +84,67 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
         bottomMotor.getConfigurator().apply(bottomConfig);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            50,
-            topVelocity,
-            topAppliedVolts,
-            topCurrent,
-            topTempCelsius,
-            bottomVelocity,
-            bottomAppliedVolts,
-            bottomCurrent,
-            bottomTempCelsius);
+                50,
+                topVelocity,
+                topAppliedVolts,
+                topCurrent,
+                topTempCelsius,
+                bottomVelocity,
+                bottomAppliedVolts,
+                bottomCurrent,
+                bottomTempCelsius);
+
+        topMotor.optimizeBusUtilization();
+        bottomMotor.optimizeBusUtilization();
     }
 
     @Override
-    public void updateInputs(FlywheelsIOInputs inputs){
+    public void updateInputs(FlywheelsIOInputs inputs) {
         BaseStatusSignal.refreshAll(
-            topVelocity,
-            topAppliedVolts,
-            topCurrent,
-            topTempCelsius,
-            bottomVelocity,
-            bottomAppliedVolts,
-            bottomCurrent,
-            bottomTempCelsius);
+                topVelocity,
+                topAppliedVolts,
+                topCurrent,
+                topTempCelsius,
+                bottomVelocity,
+                bottomAppliedVolts,
+                bottomCurrent,
+                bottomTempCelsius);
 
         inputs.topVelocityRPM = topVelocity.getValueAsDouble() * 60;
         inputs.topAppliedVolts = topAppliedVolts.getValueAsDouble();
         inputs.topCurrentAmps = topCurrent.getValueAsDouble();
         inputs.topTempCelsius = topTempCelsius.getValueAsDouble();
+
+        inputs.bottomVelocityRPM = topVelocity.getValueAsDouble() * 60;
+        inputs.bottomAppliedVolts = topAppliedVolts.getValueAsDouble();
+        inputs.bottomCurrentAmps = topCurrent.getValueAsDouble();
+        inputs.bottomTempCelsius = topTempCelsius.getValueAsDouble();
     }
 
-    public void setVoltage(double leftVolts, double rightVolts){
+    @Override
+    public void setVoltage(double topVolts, double bottomVolts) {
+        topMotor.setVoltage(topVolts);
+        ;
+        bottomMotor.setVoltage(bottomVolts);
+        // not sure if these will work properly, note to check in with managers
 
     }
 
-    public void setSpeeds(double leftRPM, double rightRPM){
-
+    @Override
+    public void setSpeeds(double topRPM, double bottomRPM) {
+        topMotor.setControl(topVelocityCtrlReq.withVelocity(topRPM / 60));
+        bottomMotor.setControl(bottomVelocityCtrlReq.withVelocity(bottomRPM / 60));
     }
 
-    public void configPID(double kP, double kI, double kD, double kV){
-
+    @Override
+    public void configPID(double kP, double kI, double kD, double kV) {
+        Slot0Configs pidConfigs = new Slot0Configs();
+        topMotor.getConfigurator().refresh(pidConfigs);
+        pidConfigs.kP = KP;
+        pidConfigs.kI = KI;
+        pidConfigs.kD = KD;
+        pidConfigs.kV = KV;
+        topMotor.getConfigurator().apply(pidConfigs);
+        bottomMotor.getConfigurator().apply(pidConfigs);
     }
-
 }

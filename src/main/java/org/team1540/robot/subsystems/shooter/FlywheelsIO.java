@@ -1,6 +1,6 @@
 package org.team1540.robot.subsystems.shooter;
 
-    import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.AutoLog;
 
 public interface FlywheelsIO {
     @AutoLog
@@ -24,18 +24,15 @@ public interface FlywheelsIO {
     /**
      * Runs open loop at the specified voltages
      */
-    default void setVoltage(double leftVolts, double rightVolts) {}
-
+    default void setVoltage(double topVolts, double bottomVolts) {}
 
     /**
      * Runs closed loop at the specified RPMs
      */
-    default void setSpeeds(double leftRPM, double rightRPM) {}
+    default void setSpeeds(double topRPM, double bottomRPM) {}
 
     /**
      * Configures the PID controller
      */
     default void configPID(double kP, double kI, double kD, double kV) {}
 }
-    
-

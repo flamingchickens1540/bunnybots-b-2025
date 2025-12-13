@@ -18,6 +18,4 @@ public final class ShooterConstants {
     public static final double BOTTOM_RPM = 4500.0;
 
     public static final double VELOCITY_LIMITS = 10;
-        
-    
 }
