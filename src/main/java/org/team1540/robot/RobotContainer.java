@@ -1,6 +1,7 @@
 package org.team1540.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -74,11 +75,16 @@ public class RobotContainer {
         DoubleSupplier bottomRPM = () -> 2 * shooterRPM.get() * (1 - shooterBias.get());
 
         Command shootPrepareCommand = Commands.either(
-                shooter.commandToSpeed(topRPM, bottomRPM)
-                        .withDeadline(drivetrain.teleopDriveWithHeadingCommand(
-                                driver.getHID(), RobotState.getInstance()::getAimingHeading, () -> true)),
-                shooter.commandToSpeed(topRPM, bottomRPM),
-                useVisionAiming::get);
+                        shooter.commandToSpeed(topRPM, bottomRPM)
+                                .withDeadline(drivetrain
+                                        .teleopDriveWithHeadingCommand(
+                                                driver.getHID(), RobotState.getInstance()::getAimingHeading, () -> true)
+                                        .asProxy()),
+                        shooter.commandToSpeed(topRPM, bottomRPM),
+                        useVisionAiming::get)
+                .deadlineFor(Commands.startEnd(
+                        () -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 1.0),
+                        () -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)));
         driver.rightStick().toggleOnTrue(shootPrepareCommand);
         driver.rightTrigger()
                 .and(shootPrepareCommand::isScheduled)
