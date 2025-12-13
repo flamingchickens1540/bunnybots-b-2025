@@ -85,7 +85,9 @@ public class RobotContainer {
                 .and(shooter::areFlywheelsSpunUp)
                 .whileTrue(feeder.runCommand(() -> 0.5, () -> 0.5).alongWith(indexer.runCommand(() -> 0.2)));
 
-        new Trigger(shooter::areFlywheelsSpunUp).and(shootPrepareCommand::isScheduled).onTrue(JoystickUtil.rumbleCommand(driver.getHID(), 1, 0.5));
+        new Trigger(shooter::areFlywheelsSpunUp)
+                .and(shootPrepareCommand::isScheduled)
+                .onTrue(JoystickUtil.rumbleCommand(driver.getHID(), 1, 0.5));
 
         copilot.rightStick()
                 .onTrue(Commands.runOnce(() -> shooterRPM.set(MathUtil.clamp(shooterRPM.get() + 100, 0, 5500)))
