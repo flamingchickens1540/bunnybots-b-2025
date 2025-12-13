@@ -1,4 +1,4 @@
-package org.team1540.robot.subsystems.shooter;
+package org.team1540.robot.subsystems.feeder;
 
 import static org.team1540.robot.subsystems.shooter.ShooterConstants.*;
 
@@ -14,28 +14,28 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 
 public class FeederIOReal implements FeederIO {
-    private final TalonFX feederMotor = new TalonFX(FEEDER_ID);
+    private final TalonFX feederMotor;
 
-    private final StatusSignal<Voltage> feederAppliedVolts = feederMotor.getMotorVoltage();
-    private final StatusSignal<Current> feederSupplyCurrent = feederMotor.getSupplyCurrent();
-    private final StatusSignal<Temperature> feederTempCelsius = feederMotor.getDeviceTemp();
-    private final StatusSignal<Current> feederStatorCurrent = feederMotor.getStatorCurrent();
+    private final StatusSignal<Voltage> feederAppliedVolts;
+    private final StatusSignal<Current> feederSupplyCurrent;
+    private final StatusSignal<Temperature> feederTempCelsius;
+    private final StatusSignal<Current> feederStatorCurrent;
 
     private final VoltageOut feederVoltageCtrlReq = new VoltageOut(0).withEnableFOC(true);
 
-    public FeederIOReal() {
-        TalonFXConfiguration config = new TalonFXConfiguration();
+    public FeederIOReal(int motorID) {
+        feederMotor = new TalonFX(motorID);
+        feederAppliedVolts = feederMotor.getMotorVoltage();
+        feederSupplyCurrent = feederMotor.getSupplyCurrent();
+        feederTempCelsius = feederMotor.getDeviceTemp();
+        feederStatorCurrent = feederMotor.getStatorCurrent();
 
-        // TODO: finsh config with voltage limits and feedback values
+        TalonFXConfiguration config = new TalonFXConfiguration();
 
         config.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
-
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-
-        // Sets neutral mode (no input) to coast
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         // Apply the configuration to the left motor
         feederMotor.getConfigurator().apply(config);

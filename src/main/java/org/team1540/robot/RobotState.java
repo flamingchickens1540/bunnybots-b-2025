@@ -11,18 +11,22 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.AutoLogOutputManager;
-import org.littletonrobotics.junction.Logger;
 import org.team1540.robot.subsystems.drivetrain.DrivetrainConstants;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionConstants;
 import org.team1540.robot.subsystems.vision.apriltag.AprilTagVisionIO;
+import org.team1540.robot.util.AllianceFlipUtil;
 
 public class RobotState {
+    private static final Translation2d TARGET_POSITION =
+            new Translation2d(Units.inchesToMeters(148.375), Units.inchesToMeters(158));
+
     private static RobotState instance = null;
 
     public static RobotState getInstance() {
@@ -43,8 +47,6 @@ public class RobotState {
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
     };
-
-    private Pose2d[] activeTrajectory;
 
     private final Field2d field = new Field2d();
 
@@ -88,9 +90,6 @@ public class RobotState {
         return false;
     }
 
-    double XY_STD_DEV_COEFF = 0.15;
-    double ROT_STD_DEV_COEFF = 0.25;
-
     private Matrix<N3, N1> getStdDevs(AprilTagVisionIO.PoseObservation poseObservation) {
         double xyStdDev =
                 XY_STD_DEV_COEFF * Math.pow(poseObservation.avgTagDistance(), 2.0) / poseObservation.numTagsSeen();
@@ -101,10 +100,6 @@ public class RobotState {
                 xyStdDev,
                 DriverStation.isEnabled() && poseObservation.numTagsSeen() <= 1 ? Double.POSITIVE_INFINITY : rotStdDev);
     }
-
-    int MIN_ACCEPTED_NUM_TAGS = 1;
-    final double MAX_AMBIGUITY = 0.2;
-    double MAX_OUTSIDE_OF_FIELD_TOLERANCE = 0.1;
 
     private boolean shouldAcceptVision(AprilTagVisionIO.PoseObservation poseObservation) {
         Pose3d estimatedPose = poseObservation.estimatedPoseMeters();
@@ -157,5 +152,11 @@ public class RobotState {
     @AutoLogOutput(key = "Odometry/FieldRelativeVelocity")
     public ChassisSpeeds getFieldRelativeVelocity() {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getRobotRotation());
+    }
+
+    public Rotation2d getAimingHeading() {
+        Translation2d robotToTarget =
+                AllianceFlipUtil.apply(TARGET_POSITION).minus(getEstimatedPose().getTranslation());
+        return robotToTarget.getAngle();
     }
 }

@@ -1,11 +1,11 @@
-package org.team1540.robot;
+package org.team1540.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -14,7 +14,6 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX intakeFalcon = new TalonFX(IntakeConstants.DEVICE_ID);
-    public boolean intakeConnected = true;
     private final StatusSignal<AngularVelocity> intakeVelocity = intakeFalcon.getVelocity();
     private final StatusSignal<Voltage> intakeAppliedVoltage = intakeFalcon.getMotorVoltage();
     private final StatusSignal<Current> intakeSupplyCurrent = intakeFalcon.getSupplyCurrent();
@@ -32,12 +31,13 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeTalonFXConfigs.CurrentLimits.withSupplyCurrentLimit(IntakeConstants.SUPPLY_LIMIT);
 
         intakeTalonFXConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        intakeTalonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        intakeFalcon.getConfigurator().apply(intakeTalonFXConfigs);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0, intakeVelocity, intakeAppliedVoltage, intakeSupplyCurrent, intakeStatorCurrent, intakeTemp);
-        {
-            intakeFalcon.optimizeBusUtilization();
-        }
+        intakeFalcon.optimizeBusUtilization();
     }
 
     @Override
@@ -46,9 +46,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
 
     public void updateInputs(IntakeInputs inputs) {
-        StatusCode intakeStatus = BaseStatusSignal.refreshAll(
-                intakeVelocity, intakeAppliedVoltage, intakeSupplyCurrent, intakeStatorCurrent, intakeTemp);
-
         inputs.intakeMotorVelocityRPS = intakeVelocity.getValueAsDouble();
         inputs.intakeMotorAppliedVolts = intakeAppliedVoltage.getValueAsDouble();
         inputs.intakeSupplyCurrentAmps = intakeSupplyCurrent.getValueAsDouble();

@@ -2,6 +2,10 @@ package org.team1540.robot.util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class JoystickUtil {
     public static double smartDeadzone(double rawInput, double deadzone) {
@@ -20,5 +24,12 @@ public class JoystickUtil {
         if (linearMagnitude < 1e-6) return Translation2d.kZero;
         Rotation2d linearDirection = new Rotation2d(rawX, rawY);
         return new Translation2d(linearMagnitude, linearDirection);
+    }
+
+    public static Command rumbleCommand(XboxController controller, double amount, double durationSeconds) {
+        return Commands.startEnd(
+                        () -> controller.setRumble(GenericHID.RumbleType.kBothRumble, amount),
+                        () -> controller.setRumble(GenericHID.RumbleType.kBothRumble, 0.0))
+                .withTimeout(durationSeconds);
     }
 }

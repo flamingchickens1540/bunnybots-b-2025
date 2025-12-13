@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
@@ -21,37 +22,17 @@ public class Indexer extends SubsystemBase {
         this.ioNegative = ioNegative;
     }
 
-    public Command intake() {
+    public Command runCommand(DoubleSupplier percent) {
         return Commands.run(
                         () -> {
-                            ioPositive.setIndexerVoltage(12);
-                            ioNegative.setIndexerVoltage(-12);
+                            ioPositive.setIndexerVoltage(percent.getAsDouble() * 12);
+                            ioNegative.setIndexerVoltage(percent.getAsDouble() * -12);
                         },
                         this)
                 .finallyDo(() -> {
                     ioPositive.setIndexerVoltage(0);
                     ioNegative.setIndexerVoltage(0);
                 });
-    }
-
-    public Command reverseIntake() {
-        return Commands.run(
-                        () -> {
-                            ioPositive.setIndexerVoltage(-12);
-                            ioNegative.setIndexerVoltage(12);
-                        },
-                        this)
-                .finallyDo(() -> {
-                    ioPositive.setIndexerVoltage(0);
-                    ioNegative.setIndexerVoltage(0);
-                });
-    }
-
-    public Command stop() {
-        return Commands.runOnce(() -> {
-            ioPositive.setIndexerVoltage(0);
-            ioNegative.setIndexerVoltage(0);
-        });
     }
 
     public static Indexer createReal() {
@@ -60,13 +41,16 @@ public class Indexer extends SubsystemBase {
                 new IndexerIOReal(IndexerConstants.SPIN_MOTOR_ID_NEGATIVE, IndexerConstants.SPIN_GEAR_RATIO_NEGATIVE));
     }
 
+    public static Indexer createDummy() {
+        return new Indexer(new IndexerIO() {}, new IndexerIO() {});
+    }
+
     @Override
     public void periodic() {
         ioNegative.updateInputs(inputNegative);
         ioPositive.updateInputs(inputPositive);
         Logger.processInputs("Indexer/positiveMotor", inputPositive);
         Logger.processInputs("Indexer/negativeMotor", inputNegative);
-        if (!ioPositive.isConnected() || !ioNegative.isConnected()) rollerDisconnectedAlert.set(true);
-        else rollerDisconnectedAlert.set(false);
+        rollerDisconnectedAlert.set(!ioPositive.isConnected() || !ioNegative.isConnected());
     }
 }

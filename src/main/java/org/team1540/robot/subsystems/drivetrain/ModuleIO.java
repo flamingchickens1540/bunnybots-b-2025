@@ -5,7 +5,6 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
 
-
     @AutoLog
     class ModuleIOInputs {
         public boolean driveConnected = false;

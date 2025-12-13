@@ -29,7 +29,7 @@ public class IndexerIOReal implements IndexerIO {
     //        public double spinStatorCurrentAmps = 0;
     //        public boolean spinConnected = true;
     public IndexerIOReal(int id, double motorRatio) {
-        spinFalcon = new TalonFX(IndexerConstants.SPIN_MOTOR_ID_POSITIVE);
+        spinFalcon = new TalonFX(id);
         spinVelocityRPS = spinFalcon.getVelocity();
         spinMotorAppliedVolts = spinFalcon.getMotorVoltage();
         spinSupplyCurrent = spinFalcon.getSupplyCurrent();

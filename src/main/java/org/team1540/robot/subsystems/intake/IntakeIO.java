@@ -1,4 +1,4 @@
-package org.team1540.robot;
+package org.team1540.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.AutoLog;
 

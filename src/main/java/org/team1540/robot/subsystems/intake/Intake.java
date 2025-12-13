@@ -1,10 +1,11 @@
-package org.team1540.robot;
+package org.team1540.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -15,7 +16,7 @@ public class Intake extends SubsystemBase {
 
     private final Alert intakeDisconnectedAlert = new Alert("Intake roller disconnected", Alert.AlertType.kError);
 
-    private Intake(IntakeIO io) {
+    public Intake(IntakeIO io) {
         if (hasInstance) throw new IllegalStateException("Instance of intake already exists");
         hasInstance = true;
         this.io = io;
@@ -42,7 +43,8 @@ public class Intake extends SubsystemBase {
         setIntakeVoltage(0);
     }
 
-    public Command commandRunIntake(double percent) {
-        return Commands.startEnd(() -> this.setIntakeVoltage(percent * 12), () -> this.setIntakeVoltage(0), this);
+    public Command runCommand(DoubleSupplier percent) {
+        return Commands.runEnd(
+                () -> this.setIntakeVoltage(percent.getAsDouble() * 12), () -> this.setIntakeVoltage(0), this);
     }
 }
