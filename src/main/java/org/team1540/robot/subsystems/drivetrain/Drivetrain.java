@@ -202,7 +202,11 @@ public class Drivetrain extends SubsystemBase {
                                 speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                                         speeds, rawGyroRotation.minus(fieldOrientatedOffset));
                             }
-                            runVelocity(speeds);
+                            if (speeds.equals(new ChassisSpeeds())) {
+                                stopWithX();
+                            } else {
+                                runVelocity(speeds);
+                            }
                         },
                         this)
                 .finallyDo(this::stop);
