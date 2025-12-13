@@ -4,22 +4,15 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface IndexerIO {
     @AutoLog
-    class IndexerIOInputs {
-        public double motorVelocityRPM = 0;
-        public double motorAppliedVolts = 0;
-        public double supplyCurrentAmps = 0;
-        public double statorCurrentAmps = 0;
-        public double intakeTempCelsius = 0.0;
-
-        public boolean carrotInIntake  = false;
+    class IndexerInputs {
+        public double spinMotorVelocityRPS = 0;
+        public double spinMotorAppliedVolts = 0;
+        public double spinSupplyCurrentAmps = 0;
+        public double spinStatorCurrentAmps = 0;
+        public boolean spinConnected = true;
     }
 
-    default void updateInputs(IndexerIOInputs inputs) {}
+    default void setIndexerVoltage(double voltage) {}
 
-    default void setIndexerVoltage(double volts) {}
-
-    default void setIndexerVelocity(double velocityRPM) {}
-
-    default void setIndexerBrakeMode(boolean isBrakeMode) {}
-
+    default void updateInputs(IndexerInputs inputs) {}
 }
