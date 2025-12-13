@@ -24,7 +24,9 @@ public record ModuleHWConfigs(
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveConfig.CurrentLimits.SupplyCurrentLimit = 40;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = 70;
+        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
+        driveConfig.CurrentLimits.SupplyCurrentLowerTime = 0.1;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveConfig.Slot0 = constants.DriveMotorGains;
 
