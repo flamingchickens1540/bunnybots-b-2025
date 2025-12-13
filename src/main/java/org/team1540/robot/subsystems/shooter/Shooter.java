@@ -14,6 +14,7 @@ public class Shooter extends SubsystemBase {
     private final FlywheelsIO.FlywheelsIOInputs flywheelInputs = new FlywheelsIO.FlywheelsIOInputs();
 
     private final FeederIOReal feeder = new FeederIOReal();
+    private final FeederIOReal.FeederIOInputs feederInputs = new FeederIO.FeederIOInputs();
 
     private double topFlywheelSetpointRPM;
     private double bottomFlywheelSetpointRPM;
@@ -25,8 +26,6 @@ public class Shooter extends SubsystemBase {
     private final LoggedTunableNumber flywheelsKI = new LoggedTunableNumber("Shooter/Flywheels/kI", Flywheels.KI);
     private final LoggedTunableNumber flywheelsKD = new LoggedTunableNumber("Shooter/Flywheels/kD", Flywheels.KD);
     private final LoggedTunableNumber flywheelsKV = new LoggedTunableNumber("Shooter/Flywheels/kV", Flywheels.KV);*/
-
-    private boolean flipper = false;
 
     private static boolean hasInstance = false;
 
@@ -59,7 +58,9 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         flywheelsIO.updateInputs(flywheelInputs);
-        Logger.processInputs("Shooter/Flywheels", (LoggableInputs) flywheelInputs);
+        feeder.updateInputs(feederInputs);
+        Logger.processInputs("Shooter/Flywheels/feeder", (LoggableInputs) flywheelInputs);
+        Logger.processInputs("Feeder", (LoggableInputs) feederInputs);
 
         if (RobotState.isDisabled()) {
             stopFlywheels();

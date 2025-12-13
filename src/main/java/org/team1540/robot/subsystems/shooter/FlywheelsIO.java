@@ -3,6 +3,8 @@ package org.team1540.robot.subsystems.shooter;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface FlywheelsIO {
+    void configPID(double kP, double kI, double kD, double kV, double kS);
+
     @AutoLog
     class FlywheelsIOInputs {
         public double topAppliedVolts = 0.0;

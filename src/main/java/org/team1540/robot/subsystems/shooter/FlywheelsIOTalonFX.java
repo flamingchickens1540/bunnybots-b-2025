@@ -45,40 +45,31 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
     private final VoltageOut bottomVoltageCtrlReq = new VoltageOut(0).withEnableFOC(true);
 
     public FlywheelsIOTalonFX() {
-        TalonFXConfiguration topConfig = new TalonFXConfiguration();
-        TalonFXConfiguration bottomConfig = new TalonFXConfiguration();
+        TalonFXConfiguration config = new TalonFXConfiguration();
 
-        topConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        topConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        bottomConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        bottomConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         // shooter current limits are banned. forever.
-        topConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
-        topConfig.CurrentLimits.StatorCurrentLimitEnable = false;
-        bottomConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
-        bottomConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+        config.CurrentLimits.SupplyCurrentLimitEnable = false;
+        config.CurrentLimits.StatorCurrentLimitEnable = false;
 
-        topConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
         // topConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
-        topConfig.Feedback.RotorToSensorRatio = 1.0;
-        bottomConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        // bottomConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
-        bottomConfig.Feedback.RotorToSensorRatio = 1.0;
+        config.Feedback.RotorToSensorRatio = 1.0;
 
-        topConfig.Slot0.kP = KP;
-        topConfig.Slot0.kI = KI;
-        topConfig.Slot0.kD = KD;
-        topConfig.Slot0.kS = KS;
-        topConfig.Slot0.kV = KV;
-        bottomConfig.Slot0.kP = KP;
-        bottomConfig.Slot0.kI = KI;
-        bottomConfig.Slot0.kD = KD;
-        bottomConfig.Slot0.kS = KS;
-        bottomConfig.Slot0.kV = KV;
+        config.Slot0.kP = KP;
+        config.Slot0.kI = KI;
+        config.Slot0.kD = KD;
+        config.Slot0.kS = KS;
+        config.Slot0.kV = KV;
 
-        topMotor.getConfigurator().apply(topConfig);
-        bottomMotor.getConfigurator().apply(bottomConfig);
+        topMotor.getConfigurator().apply(config);
+
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+        bottomMotor.getConfigurator().apply(config);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
@@ -120,11 +111,9 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
 
     @Override
     public void setVoltage(double topVolts, double bottomVolts) {
-        topMotor.setVoltage(topVolts);
-        ;
-        bottomMotor.setVoltage(bottomVolts);
+        topMotor.setControl(topVoltageCtrlReq.withOutput(topVolts));
+        bottomMotor.setControl(bottomVoltageCtrlReq.withOutput(bottomVolts));
         // not sure if these will work properly, note to check in with managers
-
     }
 
     @Override
@@ -134,13 +123,14 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
     }
 
     @Override
-    public void configPID(double kP, double kI, double kD, double kV) {
+    public void configPID(double kP, double kI, double kD, double kV, double kS) {
         Slot0Configs pidConfigs = new Slot0Configs();
         topMotor.getConfigurator().refresh(pidConfigs);
         pidConfigs.kP = KP;
         pidConfigs.kI = KI;
         pidConfigs.kD = KD;
         pidConfigs.kV = KV;
+        pidConfigs.kS = KS;
         topMotor.getConfigurator().apply(pidConfigs);
         bottomMotor.getConfigurator().apply(pidConfigs);
     }
