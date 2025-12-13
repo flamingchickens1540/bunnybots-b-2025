@@ -6,11 +6,14 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.team1540.robot.Constants.*;
 
 public class Shooter extends SubsystemBase {
     private final FlywheelsIO flywheelsIO;
-    private final FlywheelsIOInputsAutoLogged flywheelInputs = new FlywheelsIOInputsAutoLogged();
+    private final FlywheelsIO.FlywheelsIOInputs flywheelInputs = new FlywheelsIO.FlywheelsIOInputs();
+
+    private final FeederIOReal feeder = new FeederIOReal();
 
     private double topFlywheelSetpointRPM;
     private double bottomFlywheelSetpointRPM;
@@ -56,10 +59,11 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         flywheelsIO.updateInputs(flywheelInputs);
-        Logger.processInputs("Shooter/Flywheels", flywheelInputs);
+        Logger.processInputs("Shooter/Flywheels", (LoggableInputs) flywheelInputs);
 
         if (RobotState.isDisabled()) {
             stopFlywheels();
+            stopFeeder();
         }
 
         topLinearFilter.calculate(getTopFlywheelSpeed());
@@ -68,6 +72,10 @@ public class Shooter extends SubsystemBase {
 
     public void stopFlywheels() {
         setFlywheelVolts(0, 0);
+    }
+
+    public void stopFeeder() {
+        feeder.setVoltage(0);
     }
 
     // Update tunable numbers

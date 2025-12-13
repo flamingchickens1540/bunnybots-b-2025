@@ -6,12 +6,14 @@ public interface FlywheelsIO {
     @AutoLog
     class FlywheelsIOInputs {
         public double topAppliedVolts = 0.0;
-        public double topCurrentAmps = 0.0;
+        public double topSupplyCurrentAmps = 0.0;
+        public double topStatorCurrentAmps = 0.0;
         public double topVelocityRPM = 0.0;
         public double topTempCelsius = 0.0;
 
         public double bottomAppliedVolts = 0.0;
-        public double bottomCurrentAmps = 0.0;
+        public double bottomSupplyCurrentAmps = 0.0;
+        public double bottomStatorCurrentAmps = 0.0;
         public double bottomVelocityRPM = 0.0;
         public double bottomTempCelsius = 0.0;
     }

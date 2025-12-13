@@ -24,14 +24,16 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
     // top motor status signals
     private final StatusSignal<AngularVelocity> topVelocity = topMotor.getVelocity();
     private final StatusSignal<Voltage> topAppliedVolts = topMotor.getMotorVoltage();
-    private final StatusSignal<Current> topCurrent = topMotor.getSupplyCurrent();
+    private final StatusSignal<Current> topSupplyCurrent = topMotor.getSupplyCurrent();
     private final StatusSignal<Temperature> topTempCelsius = topMotor.getDeviceTemp();
+    private final StatusSignal<Current> topStatorCurrent = topMotor.getStatorCurrent();
 
     // bottom motor status signals
     private final StatusSignal<AngularVelocity> bottomVelocity = bottomMotor.getVelocity();
     private final StatusSignal<Voltage> bottomAppliedVolts = bottomMotor.getMotorVoltage();
-    private final StatusSignal<Current> bottomCurrent = bottomMotor.getSupplyCurrent();
+    private final StatusSignal<Current> bottomSupplyCurrent = bottomMotor.getSupplyCurrent();
     private final StatusSignal<Temperature> bottomTempCelsius = bottomMotor.getDeviceTemp();
+    private final StatusSignal<Current> bottomStatorCurrent = bottomMotor.getStatorCurrent();
 
     // basically PID
     private final VelocityVoltage topVelocityCtrlReq =
@@ -47,14 +49,9 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
         TalonFXConfiguration bottomConfig = new TalonFXConfiguration();
 
         topConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        topConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        topConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         bottomConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        bottomConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-        topConfig.Voltage.PeakForwardVoltage = VELOCITY_LIMITS;
-        topConfig.Voltage.PeakReverseVoltage = VELOCITY_LIMITS;
-        bottomConfig.Voltage.PeakForwardVoltage = VELOCITY_LIMITS;
-        bottomConfig.Voltage.PeakReverseVoltage = VELOCITY_LIMITS;
+        bottomConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         // shooter current limits are banned. forever.
         topConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
@@ -63,10 +60,10 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
         bottomConfig.CurrentLimits.StatorCurrentLimitEnable = false;
 
         topConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        topConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+        // topConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
         topConfig.Feedback.RotorToSensorRatio = 1.0;
         bottomConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        bottomConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+        // bottomConfig.Feedback.SensorToMechanismRatio = GEAR_RATIO;
         bottomConfig.Feedback.RotorToSensorRatio = 1.0;
 
         topConfig.Slot0.kP = KP;
@@ -87,11 +84,11 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
                 50,
                 topVelocity,
                 topAppliedVolts,
-                topCurrent,
+                topSupplyCurrent,
                 topTempCelsius,
                 bottomVelocity,
                 bottomAppliedVolts,
-                bottomCurrent,
+                bottomSupplyCurrent,
                 bottomTempCelsius);
 
         topMotor.optimizeBusUtilization();
@@ -103,21 +100,21 @@ public class FlywheelsIOTalonFX implements FlywheelsIO {
         BaseStatusSignal.refreshAll(
                 topVelocity,
                 topAppliedVolts,
-                topCurrent,
+                topSupplyCurrent,
                 topTempCelsius,
                 bottomVelocity,
                 bottomAppliedVolts,
-                bottomCurrent,
+                bottomSupplyCurrent,
                 bottomTempCelsius);
 
         inputs.topVelocityRPM = topVelocity.getValueAsDouble() * 60;
         inputs.topAppliedVolts = topAppliedVolts.getValueAsDouble();
-        inputs.topCurrentAmps = topCurrent.getValueAsDouble();
+        inputs.topSupplyCurrentAmps = topSupplyCurrent.getValueAsDouble();
         inputs.topTempCelsius = topTempCelsius.getValueAsDouble();
 
         inputs.bottomVelocityRPM = topVelocity.getValueAsDouble() * 60;
         inputs.bottomAppliedVolts = topAppliedVolts.getValueAsDouble();
-        inputs.bottomCurrentAmps = topCurrent.getValueAsDouble();
+        inputs.bottomSupplyCurrentAmps = topSupplyCurrent.getValueAsDouble();
         inputs.bottomTempCelsius = topTempCelsius.getValueAsDouble();
     }
 
