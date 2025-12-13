@@ -68,6 +68,8 @@ public class Drivetrain extends SubsystemBase {
             lastModulePositions[i] = modules[i].getPosition();
         }
 
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
+
         OdometryThread.getInstance().start();
     }
 
